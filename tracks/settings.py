@@ -141,8 +141,8 @@ REST_FRAMEWORK = {
 
 # Haystack settings #############################################################################
 awsauth = AWS4Auth(
-    os.getenv('ES_RW_AWS_ACCESS_KEY_ID', 'AKIAISO26IUEPHWHQAAA'),
-    os.getenv('ES_RW_AWS_SECRET_ACCESS_KEY', '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'),
+    os.getenv('ES_RW_AWS_ACCESS_KEY_ID', 'xxxx'),
+    os.getenv('ES_RW_AWS_SECRET_ACCESS_KEY', 'xxxx'),
     'ap-southeast-1', 'es'
 )
 
