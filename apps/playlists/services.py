@@ -6,12 +6,18 @@ database
 from .models import PlayList
 
 
+def get_playlist_by_tags(pk_list):
+    """
+    Gets the playlists objects from the database for all tags.
+    """
+    qst = PlayList.objects.filter(tags__tag_id__in=pk_list)
+    return qst
+
 def get_playlists(pk_list):
     """
-    Gets the playlists objects from the database.
+    Gets the playlists objects from the database for given playlist ids.
     """
-
-    qst = PlayList.objects.filter(tags__tag_id__in=pk_list)
+    qst = PlayList.objects.filter(playlist_id__in=pk_list)
     return qst
 
 

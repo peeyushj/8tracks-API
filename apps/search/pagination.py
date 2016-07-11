@@ -19,14 +19,14 @@ class SearchPaginator(Paginator):
     def _get_page(self, *args, **kwargs):
         """
         It returns an instance of a single page. This hook is to be used by subclasses to use an
-        alternative to the standard :cls:`Page` object.
+        alternative to the standard :cls:`Page` object. 
+        Searching is done with the help of primary keys of playlists.
 
-        I pick up primary keys of the searchResult objects which are infact the primary keys of objects
-        in the model. I do a filter based on primary keys that gives all the objects in a single MySQL query.
         """
 
         entity_pks = []
         entity_list = []
+        qst = []
 
         for each in args[0]:
             entity_pks.append(each.pk)
@@ -35,23 +35,19 @@ class SearchPaginator(Paginator):
             # Get the model involved in the search
             model = args[0][0].model
 
-            # Corresponding SQL statement to arrange queryset data based on primary key values:
-            # SELECT * FROM theme ORDER BY FIELD(`id`, 10, 2, 1). Check out this:
-            # http://blog.mathieu-leplatre.info/django-create-a-queryset-from-a-list-preserving-order.html
+            # order playlist id in the desc order:
+            ordering = 'FIELD(`playlist_id`, %s)' % ','.join(str(id) for id in entity_pks)
 
-            # Using the same logic in ORM:
-            ordering = 'FIELD(`tag_id`, %s)' % ','.join(str(id) for id in entity_pks)
-
-            # Get the required tag elements
+            # Get the required playlist elements
             entity_list = model.objects.filter(pk__in=entity_pks).extra(
                 select={'ordering': ordering}, order_by=('ordering',))
 
             # Get the required models of playlists
-            tag_pk_list = []
+            playlist_pk_list = []
             for each in entity_list:
-                tag_pk_list.append(each.tag_id)
+                playlist_pk_list.append(each.playlist_id)
 
-            qst = get_playlists(tag_pk_list).distinct()
+            qst = get_playlists(playlist_pk_list).distinct()
 
             if settings.ORGANIZE_BY == 'likes':
                 qst = sort_playlists_by_likes(qst)
@@ -63,10 +59,8 @@ class SearchPaginator(Paginator):
 
 class EntityListPagination(PageNumberPagination):
     """
-    Overrides the class PageNumberPagination so that certain parameters could
-    be set.
+    Overrides the class PageNumberPagination so that certain parameters could be set.
     """
-
     page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 50
@@ -74,8 +68,6 @@ class EntityListPagination(PageNumberPagination):
 
 class SearchListPagination(EntityListPagination):
     """
-    Overrides the class PageNumberPagination so that certain parameters could
-    be set.
+    Overrides the class PageNumberPagination so that certain parameters could be set.
     """
-
     django_paginator_class = SearchPaginator

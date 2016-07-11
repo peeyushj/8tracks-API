@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-
 # create your models here.
 class Tag(models.Model):
     """
@@ -29,7 +28,7 @@ class PlayList(models.Model):
     playlist_name = models.CharField(max_length=255, help_text=_('Name of the Playlist'),
                                 verbose_name=_('playlist_name'))
 
-    created_on = models.DateTimeField(verbose_name=_('Added'), auto_now_add=True)
+    created_on = models.DateTimeField(verbose_name=_('Added'), auto_now_add=True, null=True)
     likes = models.IntegerField(default=0)
     plays = models.IntegerField(default=0)
 

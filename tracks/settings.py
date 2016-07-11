@@ -12,9 +12,6 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 import sys
-import elasticsearch
-
-from requests_aws4auth import AWS4Auth
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -90,31 +87,11 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tracks',
         'USER': 'root',
-        'PASSWORD': 'typeset123',
-        'HOST': 'localhost',
+        'PASSWORD': 'root',
+        'HOST': '',
         'PORT': '',
     },
 }
-
-
-# Password validation
-# https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
-
-# AUTH_PASSWORD_VALIDATORS = [
-#     {
-#         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-#     },
-#     {
-#         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-#     },
-#     {
-#         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-#     },
-#     {
-#         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-#     },
-# ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
@@ -140,24 +117,13 @@ REST_FRAMEWORK = {
 }
 
 # Haystack settings #############################################################################
-awsauth = AWS4Auth(
-    os.getenv('ES_RW_AWS_ACCESS_KEY_ID', 'xxxx'),
-    os.getenv('ES_RW_AWS_SECRET_ACCESS_KEY', 'xxxx'),
-    'ap-southeast-1', 'es'
-)
-
 HAYSTACK_CONNECTIONS = {
     'default': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': os.getenv('ES_ENDPOINT', 'search-tracks-fo3lxiilnpdk67w2mknbsuc34a.ap-southeast-1.es.amazonaws.com/'),
-        'INDEX_NAME': 'haystack',
-        'KWARGS': {
-            'port': 443,
-            'http_auth': awsauth,
-            'use_ssl': True,
-            'verify_certs': True,
-            'connection_class': elasticsearch.RequestsHttpConnection,
-        },
+        'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
+        'URL': 'http://127.0.0.1:8983/solr/collection1',
+        'DEFAULT_OPERATOR': 'OR',
+        'TIMEOUT': 60 * 5,
+        'INCLUDE_SPELLING': True
     }
 }
 
