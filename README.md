@@ -3,11 +3,11 @@ Discovery Logic for Playlists based on the tags.
 
 How to Run
 ---------------
-1) clone the repository.
+1) clone the repository. (git clone https://github.com/peeyushj/8tracks-API.git)
 
-2) create the virtual environment using command - ``virtualenv <name of the environment>`` 
+2) create the virtual environment using command - ``virtualenv 8tracks-API`` (OPTIONAL: you can define your own environment name)
 
-3) Activate the virtual environment using command - ``source <name of the environment>/bin/activate``
+3) Activate the virtual environment using command - ``source 8tracks-API/bin/activate``
 
 4) Install all the required packages by running command - ``pip install -r requirements.txt``
 
