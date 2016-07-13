@@ -62,6 +62,6 @@ How to Run
 11) Run the python server again - python manage.py runserver
 
 12) APIs for getting 8-tracks data
-    a) Getting playlist for a tag(sorted by likes) - http://localhost:8000/api/search/playlists/?q=<tag_name>
-    b) Getting relavent tags for a tag (sorted by relavency) - http://localhost:8000/api/search/tags/?q=<tag_name>
+    a) Getting playlist for a tag(sorted by likes) - http://localhost:8000/api/search/playlists/?q=(tag_name)
+    b) Getting relavent tags for a tag (sorted by relavency) - http://localhost:8000/api/search/tags/?q=(tag_name)
 
