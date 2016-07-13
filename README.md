@@ -1,76 +1,67 @@
-# 8tracks
-Discovery Logic for Playlists based on the tags.
+# 8tracks(API)
+Relavant Discovery Logic for 8-tracks Playlists.
+
+-- Used Architecture --
+
+Solr engine with Haystack indexing has been used and rest API has been exposed via django-rest-framework
+SOLR is used to do fast searching. This design has been made by taking the consideration of amount of huge data (Even in sample data, I have used more than 1L playlist and their tags)
 
 How to Run
 ---------------
-1) clone the repository. (git clone https://github.com/peeyushj/8tracks-API.git)
+1) First clone the repository. (git clone https://github.com/peeyushj/8tracks-API.git)
 
-2) create the virtual environment using command - ``virtualenv 8tracks-API`` (OPTIONAL: you can define your own environment name)
+2) create the virtual environment using command - "virtualenv 8tracks-API" (OPTIONAL: you can define your own environment name)
 
-3) Activate the virtual environment using command - ``source 8tracks-API/bin/activate``
+3) Activate the virtual environment using command - "source 8tracks-API/bin/activate"
 
-4) Install all the required packages by running command - ``pip install -r requirements.txt``
+4) Install all the required packages by running command - "pip install -r requirements.txt"
 
-5) I tried dumping and undumping data in .sql file but got some errors. So one must have to do some work to give some data to the system::
+5) Create a database
     
     a) create a database named "tracks".
     b) Go to the settings file in the project and update your mysql user and password.
-    ```
-    DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tracks',
-        'USER': 'root',
-        'PASSWORD': 'alpha123',
-        'HOST': 'localhost',
-        'PORT': '',
-    },
-    }
-    ```
+        ```
+        DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'tracks',
+            'USER': 'root',
+            'PASSWORD': 'root',
+            'HOST': '',
+            'PORT': '',
+        },
+        }
+        ```
     c) After updating mysql user and password sync the databases using command - python manage.py migrate
 
-6) Run the server by managemant command - python manage.py runserver
+6) [OPTIONAL:] insert sample data sql file(playlist_data.sql) to get 1L playlist data and every playlist has around 10 tags each.
 
-7) Now it's time to populate the database. I have created two extra APIs to post playlists and tags directly from the browser::
+7) I have used SOLR to store the data of playlist with correspoding tags. To install SOLR use follwoing step:
+    a) Download solr-4.10.4 version from http://archive.apache.org/dist/lucene/solr/4.10.4/ and unzip it make the folder name as 'solr-4.10.4' (you can use other version also, but i was using this only so I continued with that.)
+    b) Build the schema out for solr and save it to schema.xml
+        python manage.py build_solr_schema > schema.xml (- Note: Do this is your django project directory)
+    c) Replace the solr schema in  "solr-4.10.4/example/solr/conf/schema.xml" with the one you made in the previous step
+    d) Go into SOLR directory and start the solr server
+        cd solr-4.0.0/example
+        java -jar start.jar
 
-    For Adding new PlayLists hit the API - localhost:8000/api/playlists/playlists/
+8) Run the python server - python manage.py runserver
+
+9) If you have not done step 6, then we can use the API to generate new playlists and tags accordingly
+
+    a) For Adding new PlayLists hit the API - http://localhost:8000/api/playlists/playlists/
     This API will list all the playlists in the system and one can also add new playlists into the system.
-    For adding new tags hit the API - localhost:8000/api/playlists/tags/
+
+    b) For adding new tags hit the API - http://localhost:8000/api/playlists/tags/
     This API will list all the tags in the system and one can also add new tags into the system.
-    
 
-8) I have kept the relationship between Tags and PlayLists as flexible. I did not define an end-point API for creating relationships between these. This can be done by inserting some entries into the *playlists_playlist_tags* in the tracks database as this table contains the entries for many to many relationship between Playlists and tags.
+    c) Tags and playlist relationship can be inserted directly from the database also.
 
-9) IMPORTANT - Every time you add new Tag instances, you have to push Tag indices to the AWS instance by using management command - python manage.py update_index
+10) Once you have completed adding data, you need to reindex the playlist's tag data into SOLR. So use the command for indexing - python manage.py update_index
 
-10) For Search API - hit the URL ```http://localhost:8000/api/search/playlists/?q=<tag_name1><tag_name2>```.
-   For Ex. - ```http://localhost:8000/api/search/playlists/?q=poprock```. here pop and rock are the two tag_names. This API will return the lists of playlists based on relevancy and sorted on basis of configuration 'ORGANIZE_BY' parameter in settings.py.
+11) Run the python server again - python manage.py runserver
 
+12) APIs for getting 8-tracks data
+    a) Getting playlist for a tag(sorted by likes) - http://localhost:8000/api/search/playlists/?q=<tag_name>
+    b) Getting relavent tags for a tag (sorted by relavency) - http://localhost:8000/api/search/tags/?q=<tag_name>
 
-
-**Detail of any PlayList** can also be viewed via URL - *http://localhost:8000/api/playlists/playlists/<playlist_id>/* where playlist_id can be unique id of any playlist in the system. 
-
-For ex - *http://localhost:8000/api/playlists/playlists/1/*  returned on my system - 
-
-```json
-HTTP 200 OK
-Allow: GET, PUT, PATCH, HEAD, OPTIONS
-Content - Type: application / json
-Vary: Accept
-
-{
-    "playlist_id": 1,
-    "playlist_name": "Led Zeppelin",
-    "likes": 10,
-    "plays": 3
-}
-``` 
-Similarily  **Detail of any Tag** can also be viewed via URL - *http://localhost:8000/api/playlists/playlists/<tag_id>/*
-where tag\_id can be unique_id of any Tag in the system.
-
-
-**Methodology Used** - 
-
-I have used the concept of Elastic Search and exposing APIs using django-rest-framework. Elastic search is used to do fast searching.
-
-I have used a AWS Elastic search instance as a remote server for hosting elastic search. The index name is haystack and it stores the indices of Tag model. You can thus do a query search on thousand of tags.
